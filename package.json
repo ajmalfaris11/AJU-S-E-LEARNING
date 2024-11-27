@@ -4,7 +4,8 @@
   "description": "Server-side logic and API for the Learning Dashboard built with the MERN stack.",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "ts-node-dev --respawn --transpile-only server.ts"
   },
   "repository": {
     "type": "git",
@@ -29,6 +30,7 @@
     "url": "https://github.com/ajmalfaris11/AJUs-Elearning-Server/issues"
   },
   "homepage": "https://github.com/ajmalfaris11/AJUs-Elearning-Server#readme",
+  
   "dependencies": {
     "@types/bcryptjs": "^2.4.6",
     "@types/cookie-parser": "^1.4.8",
