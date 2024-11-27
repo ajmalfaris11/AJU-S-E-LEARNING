@@ -1,0 +1,32 @@
+{
+  "name": "server",
+  "version": "1.0.0",
+  "description": "Server-side logic and API for the Learning Dashboard built with the MERN stack.",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ajmalfaris11/AJUs-Elearning-Server.git"
+  },
+  "keywords": [
+    "node",
+    "express",
+    "backend",
+    "api",
+    "server",
+    "elearning",
+    "MERN",
+    "mongodb",
+    "jwt",
+    "rest-api",
+    "learning-dashboard"
+  ],
+  "author": "Ajmal Faris",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ajmalfaris11/AJUs-Elearning-Server/issues"
+  },
+  "homepage": "https://github.com/ajmalfaris11/AJUs-Elearning-Server#readme"
+}
