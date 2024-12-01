@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from "express"; // Importing Express 
 import ErrorHandler from "../utils/ErrorHandler"; // Importing the custom ErrorHandler class for structured error handling
 
 // Error handling middleware to handle various types of errors and respond with appropriate messages
-module.exports = (err: any, req: Request, res: Response, next: NextFunction) => {
+export const ErrorMiddleware = (err: any, req: Request, res: Response, next: NextFunction) => {
     // Set default status code and message if not already defined
     err.statusCode = err.statusCode || 500;
     err.message = err.message || "Internal Server Error";

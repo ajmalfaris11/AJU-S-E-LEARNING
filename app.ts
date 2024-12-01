@@ -5,6 +5,8 @@ export const app = express();
 import cors from "cors"; // Importing CORS middleware for handling Cross-Origin Resource Sharing
 import cookieParser from "cookie-parser"; // Importing cookie-parser for handling cookies in requests
 
+import { ErrorMiddleware } from "./middleware/error"; // Importing custom error-handling middleware
+
 // Configuring body-parser middleware to parse incoming JSON requests with a size limit of 50MB
 app.use(express.json({ limit: "50mb" }));
 
@@ -34,3 +36,7 @@ app.all("*", (req: Request, res: Response, next: NextFunction) => {
     // Pass the error to the next middleware for centralized error handling
     next(err);
 });
+
+
+// Using the custom error-handling middleware in the application
+app.use(ErrorMiddleware); // This will handle any errors and send appropriate responses
