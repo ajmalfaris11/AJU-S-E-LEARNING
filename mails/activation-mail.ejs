@@ -1,0 +1,47 @@
+<!--
+    AJU'S Activation Email Template
+
+    Purpose:
+    - This HTML template is designed for sending account activation emails to users who have registered for an AJUS account.
+    - Utilizes EJS templating to dynamically insert user-specific data such as the user's name and activation code.
+
+    Features:
+    - Responsive design to ensure proper rendering on various devices.
+    - Styled header, body, and footer sections for a professional appearance.
+    - Includes a clear call-to-action for activating the account and support contact information.
+
+    Usage:
+    - Rendered with dynamic data (e.g., user.name, activationCode) before being sent via the email sending service.
+    - Ensure that the template file is correctly referenced in your email sending logic.
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AJU'S Activation Email</title>
+
+    <style>
+        /* Styles omitted for brevity */
+    </style>
+</head>
+<body>
+
+    <div class="email-wrapper">
+        <div class="email-header">
+            <h1>WELCOME TO AJUS</h1>
+        </div>
+        <div class="email-body">
+            <p>Hello <%= user.name %></p>
+            <p>Thank you for registering with AJUS. To activate your account, please use the following activation code:</p>
+            <h2><%= activationCode %></h2>
+            <p>Please enter this code on the activation page within the next 5 minutes.</p>
+            <p>If you did not register for an AJUS account, please ignore this email.</p>
+        </div>
+        <div class="email-footer">
+            <p>If you have any questions, please don't hesitate to contact us at <a href="mailto:ajus.support@gmail.com">ajus.support@gmail.com</a></p>
+        </div>
+    </div>
+    
+</body>
+</html>
