@@ -22,7 +22,128 @@
     <title>AJU'S Activation Email</title>
 
     <style>
-        /* Styles omitted for brevity */
+        /* Global Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #ffffff;
+            line-height: 1.6;
+            padding: 20px;
+            border-radius: 14px;
+            border: #6629e1 1px solid;
+        }
+
+
+        .email-wrapper {
+            width: 100%;
+            max-width: 650px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .email-header {
+            background-color: #6629e1;
+            color: white;
+            text-align: center;
+            padding: 50px 25px;
+        }
+
+        .email-header h1 {
+            font-size: 40px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            letter-spacing: 1px;
+        }
+
+        .email-header p {
+            font-size: 22px;
+            font-weight: 400;
+            color: #ffffff;
+        }
+
+        .email-body {
+            padding: 30px 20px;
+            font-size: 18px;
+            color: #000000;
+            background-color: #ffffff;
+        }
+
+        .email-body p {
+            margin-bottom: 20px;
+        }
+
+        .email-body h2 {
+            font-size: 36px;
+            font-weight: bold;
+            color: #b92929;
+            text-align: center;
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+
+        .email-body .activation-info {
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 6px;
+            box-shadow: 0 4px 10px rgba(33, 55, 255, 0.3);
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .email-body .activation-info h3 {
+            font-size: 28px;
+            font-weight: bold;
+            color: #6629e1;
+        }
+
+        .email-footer {
+            background-color: #6629e1;
+            color: #ffffff;
+            text-align: center;
+            padding: 20px;
+            font-size: 14px;
+        }
+
+        .email-footer p {
+            margin: 10px 0;
+        }
+
+        .email-footer a {
+            color: #ecf0f1;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 600px) {
+            .email-wrapper {
+                padding: 15px;
+            }
+
+            .email-header h1 {
+                font-size: 30px;
+            }
+
+            .email-body {
+                padding: 15px;
+            }
+
+            .email-body h2 {
+                font-size: 28px;
+            }
+
+            .email-footer {
+                padding: 15px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -30,16 +151,22 @@
     <div class="email-wrapper">
         <div class="email-header">
             <h1>WELCOME TO AJUS</h1>
+            <p>Your journey to success begins now</p>
         </div>
         <div class="email-body">
-            <p>Hello <%= user.name %></p>
+            <p>Hello <%= user.name %>,</p>
             <p>Thank you for registering with AJUS. To activate your account, please use the following activation code:</p>
-            <h2><%= activationCode %></h2>
-            <p>Please enter this code on the activation page within the next 5 minutes.</p>
+
+            <div class="activation-info">
+                <h3><%= activationCode %></h3>
+                <p>Please enter this code on the activation page within the next 5 minutes to confirm your account.</p>
+            </div>
+
             <p>If you did not register for an AJUS account, please ignore this email.</p>
         </div>
         <div class="email-footer">
-            <p>If you have any questions, please don't hesitate to contact us at <a href="mailto:ajus.support@gmail.com">ajus.support@gmail.com</a></p>
+            <p>If you have any questions, feel free to <a href="mailto:ajus.support@gmail.com">contact us</a>.</p>
+            <p>&copy; 2024 AJUS. All rights reserved.</p>
         </div>
     </div>
     
