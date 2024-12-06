@@ -14,6 +14,22 @@
     - Rendered with dynamic data (e.g., user.name, activationCode) before being sent via the email sending service.
     - Ensure that the template file is correctly referenced in your email sending logic.
 -->
+<!--
+    AJU'S Activation Email Template
+
+    Purpose:
+    - This HTML template is designed for sending account activation emails to users who have registered for an AJUS account.
+    - Utilizes EJS templating to dynamically insert user-specific data such as the user's name and activation code.
+
+    Features:
+    - Responsive design to ensure proper rendering on various devices.
+    - Styled header, body, and footer sections for a professional appearance.
+    - Includes a clear call-to-action for activating the account and support contact information.
+
+    Usage:
+    - Rendered with dynamic data (e.g., user.name, activationCode) before being sent via the email sending service.
+    - Ensure that the template file is correctly referenced in your email sending logic.
+-->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -30,12 +46,10 @@
         }
 
         body {
-            font-family: 'Arial', sans-serif;
+            font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
             background-color: #ffffff;
             line-height: 1.6;
             padding: 20px;
-            border-radius: 14px;
-            border: #6629e1 1px solid;
         }
 
 
@@ -43,64 +57,64 @@
             width: 100%;
             max-width: 650px;
             margin: 0 auto;
-            background-color: #ffffff;
-            border-radius: 8px;
+            border-radius: 32px;
             overflow: hidden;
-            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 8px 15px rgba(85, 55, 255, 0.2);
         }
 
         .email-header {
             background-color: #6629e1;
             color: white;
             text-align: center;
-            padding: 50px 25px;
+            padding: 30px 25px;
         }
 
         .email-header h1 {
-            font-size: 40px;
+            font-size: 52px;
             font-weight: 700;
-            margin-bottom: 10px;
-            letter-spacing: 1px;
+            word-spacing: 5px;
         }
 
         .email-header p {
-            font-size: 22px;
+            font-size: 24px;
             font-weight: 400;
             color: #ffffff;
         }
 
         .email-body {
-            padding: 30px 20px;
+            padding: 50px 30px;
             font-size: 18px;
             color: #000000;
             background-color: #ffffff;
         }
 
-        .email-body p {
+         p {
             margin-bottom: 20px;
+            color: #000000;
         }
 
-        .email-body h2 {
-            font-size: 36px;
-            font-weight: bold;
-            color: #b92929;
-            text-align: center;
-            margin-top: 20px;
+        .hello {
+            font-size: 22px;
+            font-weight: 600;
+            color: #6629e1;
+            text-align: start;
             margin-bottom: 20px;
         }
 
         .email-body .activation-info {
             background-color: #ffffff;
             padding: 20px;
-            border-radius: 6px;
+            padding-inline: 50px;
+            border-radius: 22px;
             box-shadow: 0 4px 10px rgba(33, 55, 255, 0.3);
             text-align: center;
             margin-bottom: 30px;
         }
 
         .email-body .activation-info h3 {
-            font-size: 28px;
+            font-size: 32px;
             font-weight: bold;
+            margin-bottom: 10px;
             color: #6629e1;
         }
 
@@ -114,6 +128,7 @@
 
         .email-footer p {
             margin: 10px 0;
+            color: #ecf0f1;
         }
 
         .email-footer a {
@@ -154,7 +169,7 @@
             <p>Your journey to success begins now</p>
         </div>
         <div class="email-body">
-            <p>Hello <%= user.name %>,</p>
+            <p class="hello">Hello <%= user.name %>,</p>
             <p>Thank you for registering with AJUS. To activate your account, please use the following activation code:</p>
 
             <div class="activation-info">
