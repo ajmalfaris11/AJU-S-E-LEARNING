@@ -1,6 +1,6 @@
 require('dotenv').config(); // Load environment variables from the .env file
 import { Request, Response, NextFunction } from "express"; // Import types for request, response, and middleware
-import userModel from "./models/user.model"; // Import the user model for database operations
+import userModel from "../models/user.model"; // Import the user model for database operations
 import ErrorHandler from "../utils/ErrorHandler"; // Custom error handler to standardize error responses
 import { CatchAsyncError } from "../middleware/catchAsyncErrors"; // Middleware to catch and handle asynchronous errors
 import jwt, { Secret } from "jsonwebtoken"; // Import JWT for token generation and verification
