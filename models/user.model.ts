@@ -100,7 +100,20 @@ const userModel: Model<IUser> = mongoose.model("user", userSchema);
 export default userModel;
 
 
-// Login user controller
+//  Login user
+interface ILoginRequest {
+    email: string;
+    password: string;
+}
+
+// ===== Login user controller =====  Login user controller =====  Login user controller =====
+
+interface ILoginRequest {
+    email: string;
+    password: string;
+}
+
+
 export const loginUser = CatchAsyncError(async(req: Request, res: Response, next: NextFunction) => {
     try {
         // Extract email and password from request body
