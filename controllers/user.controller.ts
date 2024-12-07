@@ -184,3 +184,26 @@ export const loginUser = CatchAsyncError(async(req: Request, res: Response, next
         return next(new ErrorHandler(error.message, 400));
     }
 });
+
+
+//* ===== Logout user controller =====  Logout user controller =====  Logout user controller =====
+
+// Import necessary modules and error handling functions
+export const logoutUser = CatchAsyncError(async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        // Clear the access_token cookie by setting its expiration time to 1 millisecond
+        res.cookie("access_token", "", { maxAge: 1 });
+
+        // Clear the refresh_token cookie by setting its expiration time to 1 millisecond
+        res.cookie("refresh_token", "", { maxAge: 1 });
+
+        // Send a success response indicating that the user has logged out
+        res.status(200).json({
+            success: true, // Indicates successful logout
+            message: "Logged out successfully" // Confirmation message
+        });
+    } catch (error: any) {
+        // If an error occurs, pass it to the next error handling middleware with a 400 status code
+        return next(new ErrorHandler(error.message, 400));
+    }
+});
