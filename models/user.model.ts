@@ -2,6 +2,9 @@ require ('dotenv').config();
 import mongoose, { Document, Model, Schema } from "mongoose"; // Importing required modules and types from Mongoose
 import bcrypt from "bcryptjs"; // Importing bcrypt for password hashing
 import jwt from "jsonwebtoken";
+import { CatchAsyncError } from "../middleware/catchAsyncErrors";
+import { NextFunction, Request, Response } from "express";
+import ErrorHandler from "../utils/ErrorHandler";
 // Regular expression for validating email addresses
 const emailRegexPattern: RegExp = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -95,3 +98,36 @@ userSchema.methods.comparePassword = async function (enteredPassword: string): P
 // Creating and exporting the Mongoose model for users
 const userModel: Model<IUser> = mongoose.model("user", userSchema);
 export default userModel;
+
+
+// Login user controller
+export const loginUser = CatchAsyncError(async(req: Request, res: Response, next: NextFunction) => {
+    try {
+        // Extract email and password from request body
+        const { email, password } = req.body as ILoginRequest;
+
+        // Check if email and password are provided
+        if (!email || !password) {
+            return next(new ErrorHandler("Please enter email and password", 400));
+        };
+
+        // Find user by email and include the password field explicitly
+        const user = await userModel.findOne({ email }).select("+password");
+
+        // If user is not found, return error
+        if (!user) {
+            return next(new ErrorHandler("Invalid email or password", 400));
+        }
+
+        // Compare provided password with stored password
+        const isPasswordMatch = await user.comparePassword(password);
+        if (!isPasswordMatch) {
+            return next(new ErrorHandler("Invalid email or password", 400));
+        }
+
+        // Add further logic for successful login (e.g., token generation)
+    } catch (error: any) {
+        // Handle any unexpected errors
+        return next(new ErrorHandler(error.message, 400));
+    }
+});
