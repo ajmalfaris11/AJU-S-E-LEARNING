@@ -8,6 +8,7 @@ import ejs from "ejs"; // Import EJS for rendering dynamic email templates
 import path from "path"; // Utility for working with file paths
 import sendMail from "../utils/sendMail"; // Utility for sending emails
 
+
 // Define the structure of the registration request body
 interface IRegistrationBody {
     name: string;       // User's full name
@@ -133,4 +134,50 @@ export const activateUser = CatchAsyncError(async (req: Request, res: Response, 
     } catch (error: any) {
         return next(new ErrorHandler(error.message, 400));
     }
-})
+});
+
+
+//  Login user
+interface ILoginRequest {
+    email: string;
+    password: string;
+}
+
+// ===== Login user controller =====  Login user controller =====  Login user controller =====
+
+interface ILoginRequest {
+    email: string;
+    password: string;
+}
+
+
+export const loginUser = CatchAsyncError(async(req: Request, res: Response, next: NextFunction) => {
+    try {
+        // Extract email and password from request body
+        const { email, password } = req.body as ILoginRequest;
+
+        // Check if email and password are provided
+        if (!email || !password) {
+            return next(new ErrorHandler("Please enter email and password", 400));
+        };
+
+        // Find user by email and include the password field explicitly
+        const user = await userModel.findOne({ email }).select("+password");
+
+        // If user is not found, return error
+        if (!user) {
+            return next(new ErrorHandler("Invalid email or password", 400));
+        }
+
+        // Compare provided password with stored password
+        const isPasswordMatch = await user.comparePassword(password);
+        if (!isPasswordMatch) {
+            return next(new ErrorHandler("Invalid email or password", 400));
+        }
+
+        // Add further logic for successful login (e.g., token generation)
+    } catch (error: any) {
+        // Handle any unexpected errors
+        return next(new ErrorHandler(error.message, 400));
+    }
+});
