@@ -1,6 +1,7 @@
+require ('dotenv').config();
 import mongoose, { Document, Model, Schema } from "mongoose"; // Importing required modules and types from Mongoose
 import bcrypt from "bcryptjs"; // Importing bcrypt for password hashing
-
+import jwt from "jsonwebtoken";
 // Regular expression for validating email addresses
 const emailRegexPattern: RegExp = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -17,6 +18,9 @@ export interface IUser extends Document {
     isVerified: boolean; // Whether the user's email is verified
     courses: Array<{ courseId: string }>; // List of enrolled courses with their IDs
     comparePassword: (password: string) => Promise<boolean>; // Function to compare passwords
+    SignAccessToken: () => string;
+    SignRefreshToken: () => string;
+
 }
 
 // Defining Mongoose schema for the user model with TypeScript type checking
@@ -72,6 +76,16 @@ userSchema.pre<IUser>("save", async function (next) {
     this.password = await bcrypt.hash(this.password, 10); // Hash password with a salt factor of 10
     next(); // Proceed to the next middleware
 });
+
+// Sign access token
+userSchema.methods.SignAccessToken = function (){
+    return jwt.sign({id: this._id}, process.env.ACCESS_TOKEN || '');
+};
+
+// sign refresh token
+userSchema.methods.SignRefreshToken = function () {
+    return jwt.sign({id: this._id}, process.env.REFRESH_TOKEN || '')
+}
 
 // Method to compare entered password with the stored hashed password
 userSchema.methods.comparePassword = async function (enteredPassword: string): Promise<boolean> {
