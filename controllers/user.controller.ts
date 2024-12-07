@@ -8,6 +8,7 @@ import ejs from "ejs"; // Import EJS for rendering dynamic email templates
 import path from "path"; // Utility for working with file paths
 import sendMail from "../utils/sendMail"; // Utility for sending emails
 import { sendToken } from "../utils/jwt";
+import { redis } from "../utils/redis";
 
 
 // Define the structure of the registration request body
@@ -108,18 +109,18 @@ export const activateUser = CatchAsyncError(async (req: Request, res: Response, 
         const newUser: { user: IUser; activationCode: string } = jwt.verify(
             activation_token,
             process.env.ACTIVATION_SECRET as string
-        ) as {user: IUser; activationCode:string};
+        ) as { user: IUser; activationCode: string };
 
-        if(newUser.activationCode !== activation_code) {
+        if (newUser.activationCode !== activation_code) {
             return next(new ErrorHandler("Invalid activation code", 400));
         };
 
-        const {name, email, password} = newUser.user;
+        const { name, email, password } = newUser.user;
 
-        const existUser = await userModel.findOne({email});
+        const existUser = await userModel.findOne({ email });
 
-        if(existUser) {
-            return next(new ErrorHandler("Email already exist",400));
+        if (existUser) {
+            return next(new ErrorHandler("Email already exist", 400));
         }
 
         const user = await userModel.create({
@@ -152,7 +153,7 @@ interface ILoginRequest {
 }
 
 
-export const loginUser = CatchAsyncError(async(req: Request, res: Response, next: NextFunction) => {
+export const loginUser = CatchAsyncError(async (req: Request, res: Response, next: NextFunction) => {
     try {
         // Extract email and password from request body
         const { email, password } = req.body as ILoginRequest;
@@ -196,6 +197,13 @@ export const logoutUser = CatchAsyncError(async (req: Request, res: Response, ne
 
         // Clear the refresh_token cookie by setting its expiration time to 1 millisecond
         res.cookie("refresh_token", "", { maxAge: 1 });
+
+        // Retrieve the user ID from the request object, if available. 
+        const userId = req.user?._id || "";
+
+        // Remove the user data associated with the retrieved user ID from Redis cache.
+        redis.del(userId);
+
 
         // Send a success response indicating that the user has logged out
         res.status(200).json({
