@@ -7,6 +7,7 @@ import jwt, { Secret } from "jsonwebtoken"; // Import JWT for token generation a
 import ejs from "ejs"; // Import EJS for rendering dynamic email templates
 import path from "path"; // Utility for working with file paths
 import sendMail from "../utils/sendMail"; // Utility for sending emails
+import { sendToken } from "../utils/jwt";
 
 
 // Define the structure of the registration request body
@@ -174,6 +175,8 @@ export const loginUser = CatchAsyncError(async(req: Request, res: Response, next
         if (!isPasswordMatch) {
             return next(new ErrorHandler("Invalid email or password", 400));
         }
+
+        sendToken(user, 200, res);
 
         // Add further logic for successful login (e.g., token generation)
     } catch (error: any) {
