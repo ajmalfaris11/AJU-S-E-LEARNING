@@ -40,3 +40,24 @@ export const isAuthenticated = CatchAsyncError( async (req: Request, res: Respon
     // Proceed to the next middleware or route handler
     next();
 });
+
+
+
+
+// Validate user role middleware function to authorize based on user roles
+// This function checks if the user's role matches one of the allowed roles.
+// If the user's role is not allowed to access the resource, a 403 error is thrown.
+
+// `authorizedRoles` accepts an array of allowed roles and returns a middleware function
+export const authorizedRoles = (...roles: string[]) => {
+    return (req: Request, res: Response, next: NextFunction) => {
+        // Check if the user's role is included in the allowed roles array
+        if (!roles.includes(req.user?.role || "")) {
+            // If the role is not authorized, return a 403 error with a message
+            return next(new ErrorHandler(`Role: ${req.user?.role} is not allowed to access this resource`, 403));
+        }
+        // If authorized, proceed to the next middleware
+        next();
+    };
+};
+
