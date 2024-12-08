@@ -9,6 +9,7 @@ import path from "path"; // Utility for working with file paths
 import sendMail from "../utils/sendMail"; // Utility for sending emails
 import { accessTokenOption, refreshTokenOptions, sendToken } from "../utils/jwt";
 import { redis } from "../utils/redis";
+import { getUserById } from "../services/user.service";
 
 
 // Define the structure of the registration request body
@@ -276,6 +277,27 @@ export const updateAccessToken = CatchAsyncError (async (req:Request, res:Respon
         });
     } catch (error: any) {
         // Handle errors securely
+        return next(new ErrorHandler(error.message, 400));
+    }
+});
+
+
+
+
+// Get User Information
+// This function retrieves user information based on the user ID stored in the request object.
+// It uses the `getUserById` function to fetch the user details and respond to the client.
+// In case of any errors, it passes the error to the error handling middleware.
+
+export const getUserInfo = CatchAsyncError(async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        // Extract the user ID from the request object
+        const userId: any = req.user?._id;
+
+        // Retrieve user information using the helper function
+        getUserById(userId, res);
+    } catch (error: any) {
+        // Handle errors by passing them to the error handling middleware
         return next(new ErrorHandler(error.message, 400));
     }
 });
