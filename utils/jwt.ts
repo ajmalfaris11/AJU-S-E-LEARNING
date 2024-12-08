@@ -18,7 +18,7 @@ interface ITokenOptions {
  const refreshTokenExpire = parseInt(process.env.REFRESH_TOKEN_EXPIRE || '1200', 10); // Refresh token expiration (default 1200 seconds)
 
  // Configure options for the access token cookie
- const accessTokenOption: ITokenOptions = {
+ export const accessTokenOption: ITokenOptions = {
      expires: new Date(Date.now() + accessTokenExpire * 60 * 60 * 1000), // Set expiry based on environment variable
      maxAge: accessTokenExpire * 60 * 60 * 1000, // Max age in milliseconds
      httpOnly: true, // Ensure the cookie is not accessible via JavaScript
@@ -26,7 +26,7 @@ interface ITokenOptions {
  }
 
  // Configure options for the refresh token cookie
- const refreshTokenOptions: ITokenOptions = {
+ export const refreshTokenOptions: ITokenOptions = {
      expires: new Date(Date.now() + accessTokenExpire * 24 * 60 * 60 * 1000), // Expiry time for refresh token
      maxAge: refreshTokenExpire * 24 * 60 * 60 * 1000, // Max age for refresh token
      httpOnly: true, // Ensure cookie is HTTP only (not accessible via JS)
@@ -41,8 +41,6 @@ export const sendToken = (user: IUser, statusCode: number, res: Response) => {
 
     // Store session data in Redis for fast access
     redis.set(user._id, JSON.stringify(user) as any);
-
-   
 
     // If the environment is production, set secure flag to ensure cookies are only sent over HTTPS
     if (process.env.NODE_ENV === 'production') {
