@@ -217,41 +217,65 @@ export const logoutUser = CatchAsyncError(async (req: Request, res: Response, ne
 });
 
 
-//  Update access token
+// Method: updateAccessToken
+// Description: This method securely refreshes the access token for authenticated users.
+// It verifies the refresh token from cookies, checks the session in Redis, 
+// and issues new access and refresh tokens. It helps maintain secure user sessions 
+// and prevents unauthorized access.
+// 
+// Why: This approach is commonly used by major platforms like Amazon, Flipkart, and Facebook 
+// to ensure seamless authentication and security.
+// 
+// Security Features:
+// - JWT verification for refresh token validation.
+// - Redis session check to ensure token validity.
+// - Secure cookies with HTTP-only and SameSite options.
+// - Access token with short expiration for enhanced security.
+// - Refresh token with longer expiration for persistent login.
 
 export const updateAccessToken = CatchAsyncError (async (req:Request, res:Response, next:NextFunction) => {
     try {
+        // Extract the refresh token from cookies
         const refresh_token = req.cookies.refresh_token as string;
+
+        // Verify the refresh token
         const decoded = jwt.verify(refresh_token, process.env.REFRESH_TOKEN as string) as JwtPayload;
-
         const message = 'Could not refresh token';
-        if(!decoded) {
-            return next (new ErrorHandler(message, 400));
-        }
 
-        const session = await redis.get(decoded.id as string);
-        if(!session) {
+        // Check if token is valid
+        if (!decoded) {
             return next(new ErrorHandler(message, 400));
         }
 
+        // Check if session exists in Redis
+        const session = await redis.get(decoded.id as string);
+        if (!session) {
+            return next(new ErrorHandler(message, 400));
+        }
+
+        // Parse the user data from the session
         const user = JSON.parse(session);
 
-        const accessToken = jwt.sign({id: user._id}, process.env.ACCESS_TOKEN as string, {
-            expiresIn: "5m",
+        // Generate new access and refresh tokens
+        const accessToken = jwt.sign({ id: user._id }, process.env.ACCESS_TOKEN as string, {
+            expiresIn: "5m", // Short expiration for security
         });
 
-        const refreshToken = jwt.sign({id: user._id}, process.env.REFRESH_TOKEN as string, {
-            expiresIn: "3d",
+        const refreshToken = jwt.sign({ id: user._id }, process.env.REFRESH_TOKEN as string, {
+            expiresIn: "3d", // Longer expiration for persistent login
         });
 
-        res.cookie("access_token", accessToken,accessTokenOption);
-        res.cookie("refres_token",refreshToken, refreshTokenOptions);
+        // Set secure cookies for the tokens
+        res.cookie("access_token", accessToken, accessTokenOption);
+        res.cookie("refresh_token", refreshToken, refreshTokenOptions);
 
+        // Respond with the new access token
         res.status(200).json({
-            staus:"success",
+            status: "success",
             accessToken,
-        })
-    } catch (error:any) {
+        });
+    } catch (error: any) {
+        // Handle errors securely
         return next(new ErrorHandler(error.message, 400));
     }
-})
+});
