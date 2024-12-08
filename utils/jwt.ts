@@ -37,7 +37,7 @@ export const sendToken = (user: IUser, statusCode: number, res: Response) => {
     // Configure options for the refresh token cookie
     const refreshTokenOptions: ITokenOptions = {
         expires: new Date(Date.now() + accessTokenExpire * 24 * 60 * 60 * 1000), // Expiry time for refresh token
-        maxAge: accessTokenExpire * 24 * 60 * 60 * 1000, // Max age for refresh token
+        maxAge: refreshTokenExpire * 24 * 60 * 60 * 1000, // Max age for refresh token
         httpOnly: true, // Ensure cookie is HTTP only (not accessible via JS)
         sameSite: 'lax', // SameSite attribute for the refresh token cookie
     };
