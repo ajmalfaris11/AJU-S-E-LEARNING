@@ -44,7 +44,6 @@ const userSchema: Schema<IUser> = new mongoose.Schema(
         },
         password: {
             type: String,
-            required: [true, "Please enter your password"], // Validation message for missing password
             minlength: [6, "Password must be at least 6 characters"], // Minimum length validation
             select: false, // Ensures password is not selected by default in queries
         },
