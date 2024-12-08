@@ -24,20 +24,20 @@ export const sendToken = (user: IUser, statusCode: number, res: Response) => {
 
     // Parse environment variables for token expiration times with fallback values
     const accessTokenExpire = parseInt(process.env.ACCESS_TOKEN_EXPIRE || '300', 10); // Access token expiration (default 300 seconds)
-    const AccessTokenExpire = parseInt(process.env.REFRESH_TOKEN_EXPIRE || '1200', 10); // Refresh token expiration (default 1200 seconds)
+    const refreshTokenExpire = parseInt(process.env.REFRESH_TOKEN_EXPIRE || '1200', 10); // Refresh token expiration (default 1200 seconds)
 
     // Configure options for the access token cookie
     const accessTokenOption: ITokenOptions = {
-        expires: new Date(Date.now() + accessTokenExpire * 1000), // Set expiry based on environment variable
-        maxAge: accessTokenExpire * 1000, // Max age in milliseconds
+        expires: new Date(Date.now() + accessTokenExpire * 60 * 60 * 1000), // Set expiry based on environment variable
+        maxAge: accessTokenExpire * 60 * 60 * 1000, // Max age in milliseconds
         httpOnly: true, // Ensure the cookie is not accessible via JavaScript
         sameSite: 'lax', // SameSite attribute for cookie (lax means sent with same-site requests)
     }
 
     // Configure options for the refresh token cookie
     const refreshTokenOptions: ITokenOptions = {
-        expires: new Date(Date.now() + accessTokenExpire * 1000), // Expiry time for refresh token
-        maxAge: accessTokenExpire * 1000, // Max age for refresh token
+        expires: new Date(Date.now() + accessTokenExpire * 24 * 60 * 60 * 1000), // Expiry time for refresh token
+        maxAge: accessTokenExpire * 24 * 60 * 60 * 1000, // Max age for refresh token
         httpOnly: true, // Ensure cookie is HTTP only (not accessible via JS)
         sameSite: 'lax', // SameSite attribute for the refresh token cookie
     };
