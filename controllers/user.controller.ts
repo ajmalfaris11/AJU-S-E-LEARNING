@@ -266,6 +266,8 @@ export const updateAccessToken = CatchAsyncError (async (req:Request, res:Respon
             expiresIn: "3d", // Longer expiration for persistent login
         });
 
+        req.user = user;
+
         // Set secure cookies for the tokens
         res.cookie("access_token", accessToken, accessTokenOption);
         res.cookie("refresh_token", refreshToken, refreshTokenOptions);
