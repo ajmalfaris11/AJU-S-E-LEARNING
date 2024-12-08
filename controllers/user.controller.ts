@@ -336,3 +336,60 @@ export const socialAuth = CatchAsyncError(async (req: Request, res: Response, ne
         return next(new ErrorHandler(error.message, 400));
     }
 });
+
+
+
+// Update User Information
+// This function allows updating a user's name and/or email based on the request body.
+// It checks if the new email already exists in the database and returns an error if it does.
+// If the user exists and valid changes are provided, the user info is updated and saved.
+// The updated user data is also cached in Redis for fast retrieval.
+// After the update, a success response with the updated user information is sent.
+
+interface IUpdateUserInfo {
+    name?: string;
+    email?: string;
+}
+
+export const updateUserInfo = CatchAsyncError(async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        // Destructure the name and email from the request body
+        const { name, email } = req.body as IUpdateUserInfo;
+
+        // Get the user ID from the authenticated user
+        const userId: any = req.user?._id;
+
+        // Find the user by their ID
+        const user = await userModel.findById(userId);
+
+        // Check if the new email already exists in the database
+        if (email && user) {
+            const isEmailExist = await userModel.findOne({ email });
+            if (isEmailExist) {
+                // Return an error if the email already exists
+                return next(new ErrorHandler("Email already exists", 400));
+            }
+            user.email = email;
+        }
+
+        // Update the user's name if provided
+        if (name && user) {
+            user.name = name;
+        }
+
+        // Save the updated user information to the database
+        await user?.save();
+
+        // Update the user data in Redis cache
+        await redis.set(userId, JSON.stringify(user));
+
+        // Send a success response with the updated user data
+        res.status(201).json({
+            success: true,
+            user,
+        });
+    } catch (error: any) {
+        // Handle errors and pass them to the error handler
+        return next(new ErrorHandler(error.message, 400));
+    }
+});
