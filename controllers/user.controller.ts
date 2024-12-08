@@ -301,3 +301,38 @@ export const getUserInfo = CatchAsyncError(async (req: Request, res: Response, n
         return next(new ErrorHandler(error.message, 400));
     }
 });
+
+
+interface ISocialAuthBody {
+    email: string;
+    name: string;
+    avatar: string;
+}
+
+// Social Authentication Function
+// This function handles the authentication of a user via a third-party social authentication service.
+// It checks if the user already exists by their email, and either creates a new user or returns an existing one.
+// Once the user is found or created, a token is generated and sent to the user for authentication.
+
+export const socialAuth = CatchAsyncError(async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        // Destructure the email, name, and avatar from the request body
+        const { email, name, avatar } = req.body as ISocialAuthBody;
+
+        // Check if a user already exists with the provided email
+        const user = await userModel.findOne({ email });
+
+        // If the user doesn't exist, create a new one and send a token
+        if (!user) {
+            const newUser = await userModel.create({ email, name, avatar });
+            sendToken(newUser, 200, res);
+        } else {
+            // If the user exists, send a token for the existing user
+            sendToken(user, 200, res);
+        }
+
+    } catch (error: any) {
+        // Handle errors by passing them to the error handler middleware
+        return next(new ErrorHandler(error.message, 400));
+    }
+});
