@@ -140,11 +140,6 @@ export const activateUser = CatchAsyncError(async (req: Request, res: Response, 
 });
 
 
-//  Login user
-interface ILoginRequest {
-    email: string;
-    password: string;
-}
 
 // ===== Login user controller =====  Login user controller =====  Login user controller =====
 
@@ -393,5 +388,66 @@ export const updateUserInfo = CatchAsyncError(async (req: Request, res: Response
     } catch (error: any) {
         // Handle errors and pass them to the error handler
         return next(new ErrorHandler(error.message, 400));
+    }
+});
+
+
+// *UPDATE PASWORD ===== UPDATE PASWORD ===== UPDATE PASWORD ===== UPDATE PASWORD 
+
+
+// Interface to define the structure of the request body for updating the password
+interface IUpdatePassword {
+    oldPassword: string;
+    newPassword: string;
+}
+
+// Controller function to handle password update logic
+export const updatePassword = CatchAsyncError(async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        // Destructure old and new password from the request body
+        const { oldPassword, newPassword } = req.body as IUpdatePassword;
+
+        // Get userId from the authenticated user object
+        const userId: any = req.user?._id;
+
+        // Check if both old and new passwords are provided
+        if (!oldPassword || !newPassword) {
+            return next(new ErrorHandler("Please enter the old and new password", 400));
+        }
+
+        // Find the user from the database and select the password field
+        const user = await userModel.findById(req.user?._id).select("+password");
+
+        // Check if the user is valid and has a password field
+        if (user?.password === undefined) {
+            return next(new ErrorHandler("Invalid user", 400));
+        }
+
+        // Compare the old password with the stored password
+        const isPasswordMatch = await user?.comparePassword(oldPassword);
+
+        // If old password doesn't match, return an error
+        if (!isPasswordMatch) {
+            return next(new ErrorHandler("Invalid old password", 400));
+        }
+
+        // Update the user's password with the new password
+        user.password = newPassword;
+
+        // Save the updated user document
+        await user.save();
+
+        // Update the user data in Redis cache
+        await redis.set(userId, JSON.stringify(user));
+
+        // Return a success response with the updated user object
+        res.status(201).json({
+            success: true,
+            user,
+        });
+
+    } catch (error: any) {
+        // Return error response if an exception occurs
+        return next(new ErrorHandler(error.message, 400)); 
     }
 });
