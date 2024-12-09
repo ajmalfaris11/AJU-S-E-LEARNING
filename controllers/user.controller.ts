@@ -10,6 +10,7 @@ import sendMail from "../utils/sendMail"; // Utility for sending emails
 import { accessTokenOption, refreshTokenOptions, sendToken } from "../utils/jwt";
 import { redis } from "../utils/redis";
 import { getUserById } from "../services/user.service";
+import cloudinary from "cloudinary";
 
 
 // Define the structure of the registration request body
@@ -448,6 +449,62 @@ export const updatePassword = CatchAsyncError(async (req: Request, res: Response
 
     } catch (error: any) {
         // Return error response if an exception occurs
+        return next(new ErrorHandler(error.message, 400)); 
+    }
+});
+
+// *UPDATE AVATAR ===== UPDATE AVATAR ===== UPDATE AVATAR ===== UPDATE AVATAR 
+// Handles user profile picture updates using Cloudinary and Redis caching
+
+interface IUpdatePicture {
+    avatar: string;  // Expected structure for the avatar data
+}
+
+export const updateProfilePicture = CatchAsyncError(async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        // Extract avatar from request body
+        const { avatar }: IUpdatePicture = req.body;
+
+        // Extract user ID from request object
+        const userId = req?.user?._id as string;
+
+        // Fetch user data from the database
+        const user = await userModel.findById(userId);
+
+        // Proceed if both avatar and user data exist
+        if (avatar && user) {
+            if (user?.avatar?.public_id) {
+                // Delete the existing avatar from Cloudinary
+                await cloudinary.v2.uploader.destroy(user?.avatar?.public_id);
+            }
+
+            // Upload the new avatar to Cloudinary
+            const myCloud = await cloudinary.v2.uploader.upload(avatar, {
+                folder: "avatars",   // Define upload folder in Cloudinary
+                width: 150,          // Set image width for standardization
+            });
+
+            // Update user avatar details in the database
+            user.avatar = {
+                public_id: myCloud.public_id, // Unique Cloudinary public ID
+                url: myCloud.secure_url,      // Secure Cloudinary image URL
+            };
+        }
+
+        // Save updated user details to the database
+        await user?.save();
+
+        // Cache the updated user data in Redis
+        await redis.set(userId, JSON.stringify(user));
+
+        // Respond with success status and updated user data
+        res.status(200).json({
+            success: true,
+            user,
+        });
+
+    } catch (error: any) {
+        // Handle unexpected errors and pass them to global error middleware
         return next(new ErrorHandler(error.message, 400)); 
     }
 });
