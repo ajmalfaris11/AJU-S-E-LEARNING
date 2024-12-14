@@ -149,20 +149,39 @@ export const getSingleCourse = CatchAsyncError(
     }
 );
 
-// Get all courses without requiring purchase
+// Get all courses with Redis caching to optimize performance
 export const getAllCourse = CatchAsyncError(
     async (req: Request, res: Response, next: NextFunction) => {
       try {
-        // Retrieve all courses while excluding sensitive course data
+
+        // Check if all courses data exists in Redis cache
+        const isCacheExist = await redis.get("allCourses");
+
+        if (isCacheExist) {
+             // Return cached courses data if available
+            const courses = JSON.parse(isCacheExist);
+            
+            res.status(200).json({
+                sucess:true,
+                courses,
+            })
+        } else {
+
+            // Fetch all courses from MongoDB if not found in Redis
         const courses = await CourseModel.find().select(
-          "-courseData.videoUrl -courseData.suggestion -courseData.questions -courseData.links"
-        );
-  
-        // Send the list of courses as a successful response
-        res.status(200).json({
-          success: true,
-          courses,
-        });
+            "-courseData.videoUrl -courseData.suggestion -courseData.questions -courseData.links"
+          );
+
+          // Cache the fetched courses data in Redis
+          await redis.set("allCourses", JSON.stringify(courses));
+    
+          // Send the list of courses as a successful response
+          res.status(200).json({
+            success: true,
+            courses,
+          });
+        }
+        
       } catch (error: any) {
         // Handle errors and pass to the next middleware
         return next(new ErrorHandler(error.message, 500));
