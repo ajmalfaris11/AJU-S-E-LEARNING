@@ -5,6 +5,7 @@ import cloudinary from "cloudinary";
 import { createCourse } from "../services/course.service";
 import CourseModel from "../models/course.model";
 import mongoose from "mongoose";
+import { redis } from "../utils/redis";
 
 // Function to handle course uploads
 export const uploadCourse = CatchAsyncError(
@@ -104,16 +105,43 @@ export const editCourse = CatchAsyncError(
 export const getSingleCourse = CatchAsyncError(
     async (req: Request, res: Response, next: NextFunction) => {
         try {
-            // Find the course by ID while excluding sensitive course data
+
+            const courseId = req.params.id;
+
+            // Check if course data exists in Redis cache
+            const isCacheExist = await redis.get(courseId);
+
+            if (isCacheExist){
+                // Return cached course data if available
+                const course = JSON.parse(isCacheExist);
+                res.status(200).json({
+                    success: true,
+                    course,
+                });
+
+                console.log("Hitting Redis Cache");
+
+            } else {
+
+            // Fetch course data from MongoDB if not found in Redis
             const course = await CourseModel.findById(req.params.id).select(
                 "-courseData.videoUrl -courseData.suggestion -courseData.questions -courseData.links"
             );
+
+            console.log("Hitting MongoDB");
+
+            // Cache the fetched course data in Redis
+            await redis.set(courseId, JSON.stringify(course));
 
             // Send the course data as a successful response
             res.status(200).json({
                 success: true,
                 course,
-            });
+             });
+
+            }
+
+            
         } catch (error: any) {
             // Handle errors and pass to the next middleware
             return next(new ErrorHandler(error.message, 500));
