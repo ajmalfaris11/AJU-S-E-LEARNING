@@ -1,10 +1,10 @@
 import mongoose, {Document, Model, Schema} from "mongoose";
 
 // Interface for a comment
-interface IComment extends Document {
+interface IQuestion extends Document {
     user: object,
-    comment: string,
-    commentReplies:IComment[],
+    question: string,
+    questionReplies:IQuestion[],
 }
 
 // Interface for a review
@@ -75,10 +75,10 @@ const linkSchema = new Schema<ILink>({
 });
 
 // Schema for a user comment on the course
-const commentSchema = new Schema<IComment>({
+const QuestionSchema = new Schema<IQuestion>({
     user: Object,  
-    comment: String,  
-    commentReplies: [Object],  // Replies to the comment (can be nested objects)
+    question: String,  
+    questionReplies: [Object],  // Replies to the comment (can be nested objects)
 });
 
 // Schema for course content details, including video and links
