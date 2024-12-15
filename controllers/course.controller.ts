@@ -419,6 +419,11 @@ export const addReview = CatchAsyncError(async (req: Request, res: Response, nex
 
         await course?.save();
 
+        const notification = {
+            title: "New review Received",
+            message: `${req.user?.name} Has given a review in  ${course?.name}`,
+        }
+
     } catch (error: any) {
         // Handle and forward errors to the error handler
         return next(new ErrorHandler(error.message, 500));
