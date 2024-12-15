@@ -91,7 +91,7 @@ const courseDataSchema = new Schema<ICourseData>({
     videoPlayer: String,  
     links: [linkSchema],  // List of external resource links
     suggestion: String,  // Additional course suggestions or notes
-    questions: [commentSchema],  // List of questions related to the content
+    questions: [QuestionSchema],  // List of questions related to the content
 });
 
 // Main course schema
