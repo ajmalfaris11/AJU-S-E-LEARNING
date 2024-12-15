@@ -244,7 +244,7 @@ export const addQueston = CatchAsyncError(async (req: Request, res: Response, ne
         const courseContent = course?.courseData?.find((item: any) => item._id.equals(contentId));
 
         // If no matching content is found, return an error indicating an invalid `contentId`
-        if(!courseContent) {
+        if (!courseContent) {
             return next(new ErrorHandler("Invalid content id", 400))
         }
 
@@ -322,12 +322,12 @@ export const answerQuestion = CatchAsyncError(async (req: Request, res: Response
         // Save the updated course back to the database
         await course?.save();
 
-        if(req.user?._id === question.user._id){
+        if (req.user?._id === question.user._id) {
             // create notification
-        } 
+        }
 
         // If the user replying is not the author of the question, send a notification to email
-        else{  
+        else {
             const data = {
                 name: question.user.name, // Name of the question author
                 title: courseContent.title, // Title of the course content
@@ -350,14 +350,14 @@ export const answerQuestion = CatchAsyncError(async (req: Request, res: Response
             }
         }
 
-        
+
         // Send a success response
         res.status(200).json({
             success: true,
             course,
         });
 
-    
+
     } catch (error: any) {
         // Handle any unexpected errors gracefully
         return next(new ErrorHandler(error.message, 500));
@@ -371,7 +371,7 @@ interface IAddReviewData {
     userId: string; // ID of the user adding the review
 }
 
-export const addReview = CatchAsyncError(async(req: Request, res: Response, next: NextFunction) => {
+export const addReview = CatchAsyncError(async (req: Request, res: Response, next: NextFunction) => {
     try {
         // Extract the list of courses the user has access to
         const userCourseList = req.user?.courses;
@@ -379,7 +379,7 @@ export const addReview = CatchAsyncError(async(req: Request, res: Response, next
 
         // Check if the user has access to the course by verifying courseId in userCourseList
         const courseExists = userCourseList?.some((course: any) => course._id.toString() === courseId.toString());
-        
+
         if (!courseExists) {
             // Return an error if the user is not eligible to review the course
             return next(new ErrorHandler("You are not eligible to access this course", 400));
@@ -400,6 +400,24 @@ export const addReview = CatchAsyncError(async(req: Request, res: Response, next
 
         // Add the new review to the course's reviews array
         course?.reviews.push(reviewData);
+
+        // Initialize the average rating variable to 0
+        let avg = 0;
+
+        // Iterate through each review in the course's reviews array
+        course?.reviews.forEach((rev: any) => {
+            // Accumulate the rating from each review
+            avg += rev.rating;
+        });
+
+        // Calculate the average rating only if the course exists
+        if (course) {
+            // Compute the average by dividing the total rating by the number of reviews
+            course.ratings = avg / course.reviews.length;
+        }
+
+
+        await course?.save();
 
     } catch (error: any) {
         // Handle and forward errors to the error handler
