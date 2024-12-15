@@ -214,3 +214,52 @@ export const getCourseByUser = CatchAsyncError(async (req: Request, res: Respons
         return next(new ErrorHandler(error.message, 500));
     }
 });
+
+
+// Add a Question to Course Content
+interface IAddQuestionData {
+    question: string; // The question text provided by the user
+    courseId: string; // ID of the course where the question will be added
+    contentId: string; // ID of the specific course content to which the question belongs
+};
+
+export const addQueston = CatchAsyncError(async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        // Destructure and type-check input data from the request body
+        const { question, courseId, contentId }: IAddQuestionData = req.body;
+
+        // Find the course by its ID
+        const course = await CourseModel.findById(courseId);
+
+        // Validate the `contentId` to ensure it is a valid MongoDB ObjectId
+        if (!mongoose.Types.ObjectId.isValid(contentId)) {
+            return next(new ErrorHandler("Invalid content id", 400));
+        }
+
+        // Locate the specific content within the course by matching the `contentId`
+        const courseContent = course?.courseData?.find((item: any) => item._id.equals(contentId));
+
+        // Create a new question object with the provided data
+        const newQuestion: any = {
+            user: req.user, // Associate the question with the currently authenticated user
+            question, // The question text
+            questionReplies: [], // Initialize an empty array for replies to this question
+        };
+
+        // Add the new question to the `questions` array of the specific course content
+        courseContent?.questions.push(newQuestion);
+
+        // Save the updated course back to the database
+        await course?.save();
+
+        // Send a success response with the updated course data
+        res.status(200).json({
+            success: true,
+            course,
+        });
+
+    } catch (error: any) {
+        // Handle any unexpected errors gracefully
+        return next(new ErrorHandler(error.message, 500));
+    }
+});
