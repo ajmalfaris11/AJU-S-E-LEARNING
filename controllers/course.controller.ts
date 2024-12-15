@@ -239,6 +239,11 @@ export const addQueston = CatchAsyncError(async (req: Request, res: Response, ne
         // Locate the specific content within the course by matching the `contentId`
         const courseContent = course?.courseData?.find((item: any) => item._id.equals(contentId));
 
+        // If no matching content is found, return an error indicating an invalid `contentId`
+        if(!courseContent) {
+            return next(new ErrorHandler("Invalid content id", 400))
+        }
+
         // Create a new question object with the provided data
         const newQuestion: any = {
             user: req.user, // Associate the question with the currently authenticated user
@@ -256,6 +261,67 @@ export const addQueston = CatchAsyncError(async (req: Request, res: Response, ne
         res.status(200).json({
             success: true,
             course,
+        });
+
+    } catch (error: any) {
+        // Handle any unexpected errors gracefully
+        return next(new ErrorHandler(error.message, 500));
+    }
+});
+
+// Add an Answer to a Course Question
+interface IAddAnswerData {
+    answer: string; // The answer text provided by the user
+    courseId: string; // ID of the course where the question exists
+    contentId: string; // ID of the specific course content containing the question
+    questionId: string; // ID of the specific question to which the answer belongs
+}
+
+export const answerQuestion = CatchAsyncError(async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        // Destructure and type-check input data from the request body
+        const { answer, courseId, contentId, questionId }: IAddAnswerData = req.body;
+
+        // Find the course by its ID
+        const course = await CourseModel.findById(courseId);
+
+        // Validate the `contentId` to ensure it is a valid MongoDB ObjectId
+        if (!mongoose.Types.ObjectId.isValid(contentId)) {
+            return next(new ErrorHandler("Invalid content id", 400));
+        }
+
+        // Locate the specific content within the course by matching the `contentId`
+        const courseContent = course?.courseData?.find((item: any) => item._id.equals(contentId));
+
+        // Check if the specified course content exists
+        if (!courseContent) {
+            return next(new ErrorHandler("Invalid content id", 400));
+        }
+
+        // Locate the specific question within the content by matching the `questionId`
+        const question = courseContent?.questions?.find((item: any) => item._id.equals(questionId));
+
+        // Check if the specified question exists
+        if (!question) {
+            return next(new ErrorHandler("Invalid question id", 400));
+        }
+
+        // Create a new answer object with the provided data
+        const newAnswer: any = {
+            user: req.user, // Associate the answer with the currently authenticated user
+            answer, // The answer text
+        };
+
+        // Add the new answer to the `questionReplies` array of the specified question
+        question.questionReplies.push(newAnswer);
+
+        // Save the updated course back to the database
+        await course?.save();
+
+        // Send a success response (could include additional response data if needed)
+        res.status(200).json({
+            success: true,
+            message: "Answer added successfully",
         });
 
     } catch (error: any) {

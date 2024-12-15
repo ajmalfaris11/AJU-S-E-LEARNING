@@ -39,7 +39,7 @@ interface ICourseData extends Document {
     videoPlayer: string,
     links: ILink[],
     suggestion: string,
-    questions: IComment[],
+    questions: IQuestion[],
 };
 
 // Interface for the main course model
