@@ -1,15 +1,16 @@
 import mongoose, {Document, Model, Schema} from "mongoose";
+import { IUser } from "./user.model";
 
 // Interface for a question
 interface IQuestion extends Document {
-    user: object,
+    user: IUser,
     question: string,
     questionReplies:IQuestion[],
 }
 
 // Interface for a Comments
 interface IComment extends Document {
-    user: object,
+    user: IUser,
     comment: string,
     commentReplies:IComment[],
 }
