@@ -1,10 +1,17 @@
 import mongoose, {Document, Model, Schema} from "mongoose";
 
-// Interface for a comment
+// Interface for a question
 interface IQuestion extends Document {
     user: object,
     question: string,
     questionReplies:IQuestion[],
+}
+
+// Interface for a Comments
+interface IComment extends Document {
+    user: object,
+    comment: string,
+    commentReplies:IComment[],
 }
 
 // Interface for a review
