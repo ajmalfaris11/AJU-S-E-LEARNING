@@ -6,6 +6,10 @@ import { createCourse } from "../services/course.service";
 import CourseModel from "../models/course.model";
 import mongoose from "mongoose";
 import { redis } from "../utils/redis";
+import path from "path";
+import ejs from "ejs";
+import sendMail from "../utils/sendMail";
+
 
 // Function to handle course uploads
 export const uploadCourse = CatchAsyncError(
@@ -318,12 +322,42 @@ export const answerQuestion = CatchAsyncError(async (req: Request, res: Response
         // Save the updated course back to the database
         await course?.save();
 
-        // Send a success response (could include additional response data if needed)
+        if(req.user?._id === question.user._id){
+            // create notification
+        } 
+
+        // If the user replying is not the author of the question, send a notification to email
+        else{  
+            const data = {
+                name: question.user.name, // Name of the question author
+                title: courseContent.title, // Title of the course content
+                replayContent: answer, // The answer text being replied
+            };
+
+            // Render the email HTML template using EJS with the answer details
+            const html = await ejs.renderFile(path.join(__dirname, "../mails/question-replay.ejs"), data);
+
+            try {
+                // Send the email notification to the question author
+                await sendMail({
+                    email: question.user.email, // The question author's email
+                    subject: "Question Replay", // Email subject
+                    template: "Question-replay.ejs", // Template for the email
+                    data, // Data to be inserted in the template
+                });
+            } catch (error: any) {
+                return next(new ErrorHandler(error.message, 500));
+            }
+        }
+
+        
+        // Send a success response
         res.status(200).json({
             success: true,
-            message: "Answer added successfully",
+            course,
         });
 
+    
     } catch (error: any) {
         // Handle any unexpected errors gracefully
         return next(new ErrorHandler(error.message, 500));
