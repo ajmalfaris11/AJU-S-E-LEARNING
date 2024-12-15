@@ -363,3 +363,46 @@ export const answerQuestion = CatchAsyncError(async (req: Request, res: Response
         return next(new ErrorHandler(error.message, 500));
     }
 });
+
+// Interface for the data structure of a review to be added
+interface IAddReviewData {
+    review: string; // The review text provided by the user
+    rating: number; // The rating for the course (e.g., out of 5)
+    userId: string; // ID of the user adding the review
+}
+
+export const addReview = CatchAsyncError(async(req: Request, res: Response, next: NextFunction) => {
+    try {
+        // Extract the list of courses the user has access to
+        const userCourseList = req.user?.courses;
+        const courseId = req.params.id;
+
+        // Check if the user has access to the course by verifying courseId in userCourseList
+        const courseExists = userCourseList?.some((course: any) => course._id.toString() === courseId.toString());
+        
+        if (!courseExists) {
+            // Return an error if the user is not eligible to review the course
+            return next(new ErrorHandler("You are not eligible to access this course", 400));
+        };
+
+        // Find the course in the database by its ID
+        const course = await CourseModel.findById(courseId);
+
+        // Extract review and rating data from the request body
+        const { review, rating } = req.body as IAddReviewData;
+
+        // Create a new review object
+        const reviewData: any = {
+            user: req.user, // The user adding the review
+            comment: review, // The text of the review
+            rating, // The rating provided for the course
+        };
+
+        // Add the new review to the course's reviews array
+        course?.reviews.push(reviewData);
+
+    } catch (error: any) {
+        // Handle and forward errors to the error handler
+        return next(new ErrorHandler(error.message, 500));
+    }
+});

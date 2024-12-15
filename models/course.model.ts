@@ -17,7 +17,7 @@ interface IComment extends Document {
 
 // Interface for a review
 interface IReview extends Document {
-    user: object,
+    user: IUser,
     rating: number,
     comment: string,
     commentReplies: IComment[],
