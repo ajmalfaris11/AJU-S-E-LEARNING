@@ -424,6 +424,16 @@ export const addReview = CatchAsyncError(async (req: Request, res: Response, nex
             message: `${req.user?.name} Has given a review in  ${course?.name}`,
         }
 
+        // craete notification
+
+
+        // Send a success response
+        res.status(200).json({
+            success: true,
+            course,
+        });
+
+
     } catch (error: any) {
         // Handle and forward errors to the error handler
         return next(new ErrorHandler(error.message, 500));
