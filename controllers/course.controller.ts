@@ -474,6 +474,10 @@ export const addReplayToReview = CatchAsyncError(async (req: Request, res: Respo
             comment,       // Include the comment provided in the request
         };
 
+        if(!review.commentReplies){
+            review.commentReplies = [];
+        }
+
         // Add the reply to the review's replies array
         review.commentReplies.push(replayData);
 
