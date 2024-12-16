@@ -439,3 +439,54 @@ export const addReview = CatchAsyncError(async (req: Request, res: Response, nex
         return next(new ErrorHandler(error.message, 500));
     }
 });
+
+
+//  add replay in review
+interface IAddReviewData {
+    comment: string;
+    courseId: string;
+    reviewId: string;
+}
+export const addReplayToReview = CatchAsyncError(async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        // Extract necessary data from the request body
+        const {comment, courseId, reviewId} = req.body as IAddReviewData;
+
+        // Find the course by ID
+        const course = await CourseModel.findById(courseId);
+
+        // If the course is not found, return a 404 error
+        if (!course) {
+            return next(new ErrorHandler("Course not found", 404));
+        }
+
+        // Locate the specific review using the review ID
+        const review = course?.reviews?.find((rev: any) => rev._id.toString() === reviewId);
+
+        // If the review is not found, return a 404 error
+        if (!review) {
+            return next(new ErrorHandler("Review not found", 404));
+        }
+
+        // Create the reply data
+        const replayData: any = {
+            user: req.user, // Associate the reply with the current user
+            comment,       // Include the comment provided in the request
+        };
+
+        // Add the reply to the review's replies array
+        review.commentReplies.push(replayData);
+
+        // Save the updated course document to the database
+        await course?.save();
+
+        // Send a success response with the updated course details
+        res.status(200).json({
+            success: true,
+            course,
+        });
+    } catch (error: any) {
+        // Catch and forward any errors to the global error handler
+        return next(new ErrorHandler(error.message, 500));
+    }
+});

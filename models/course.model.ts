@@ -74,6 +74,7 @@ const reviewSchema = new Schema<IReview>({
         default: 0,  
     },
     comment: String,  
+    commentReplies: [Object],
 });
 
 // Schema for external resource link related to the course
