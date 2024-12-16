@@ -9,6 +9,8 @@ import { ErrorMiddleware } from "./middleware/error"; // Importing custom error-
 
 import userRouter from "./routes/user.route";
 import courseRouter from "./routes/course.route";
+import orderRouter from "./routes/order.route";
+
 
 // Configuring body-parser middleware to parse incoming JSON requests with a size limit of 50MB
 app.use(express.json({ limit: "50mb" }));
@@ -24,6 +26,7 @@ app.use(cors({
 // routes
 app.use("/api/v1/", userRouter);
 app.use("/api/v1/", courseRouter);
+app.use("/api/v1/", orderRouter);
 
 
 // TESTING API Endpoint: Defines a GET route for "/test" to verify if the API is functioning properly
