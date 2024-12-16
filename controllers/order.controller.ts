@@ -1,60 +1,118 @@
 import { NextFunction, Request, Response } from "express";
 import { CatchAsyncError } from "../middleware/catchAsyncErrors";
 import ErrorHandler from "../utils/ErrorHandler";
-import OrderModel, {IOrder} from "../models/order.model";
+import OrderModel, { IOrder } from "../models/order.model";
 import userModel from "../models/user.model";
 import CourseModel from "../models/course.model";
 import path from "path";
 import ejs from "ejs";
 import sendMail from "../utils/sendMail";
-import NotificatinoModel from "../models/notification.model";
+import NotificationModel from "../models/notification.model";
 import { newOrder } from "../services/order.service";
 
-
-//  create order
-
-export const createOrder = CatchAsyncError(async(req:Request, res:Response, next:NextFunction) => {
+// Controller to create an order for a course
+export const createOrder = CatchAsyncError(
+  async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const {courseId, payment_info} = req.body as IOrder;
+      // Extract courseId and payment info from the request body
+      const { courseId, payment_info } = req.body as IOrder;
 
-        const user = await userModel.findById(req.user?._id);
+      // Find the user based on the authenticated user ID from the request
+      const user = await userModel.findById(req.user?._id);
 
-        const courseExistInUser = user?.courses.some((course:any) => course._id.toString() === courseId);
-        
-        if(courseExistInUser){
-            return next(new ErrorHandler("You have a already purchased this course", 400));
-        };
+      // Log user details for debugging (can be removed in production)
+      console.log(user);
 
-        const course = await CourseModel.findById(courseId);
+      // Check if the user has already purchased the course
+      const courseExistInUser = user?.courses.some(
+        (course: any) => course._id.toString() === courseId
+      );
 
-        if(!course){
-            return next(new ErrorHandler("Course not found", 404));
-        };
+      // If the course is already purchased, return a 400 error
+      if (courseExistInUser) {
+        return next(
+          new ErrorHandler("You have already purchased this course", 400)
+        );
+      }
 
-        const data:any = {
-            courseId: course._id,
-            userId: user?._id,
-        };
+      // Fetch the course by its ID
+      const course = await CourseModel.findById(courseId);
 
-        newOrder(data, res, next);
+      // If course does not exist, return a 404 error
+      if (!course) {
+        return next(new ErrorHandler("Course not found", 404));
+      }
 
-        const mailData = {
-            order: {
-                _id: (course._id as string).slice(0, 6),
-                name: course.name,
-                price: course.price,
-                data: new Date().toLocaleDateString('en-US', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric',
-                }),
-                userId: user?._id, 
-            }
-        };
+      // Prepare the data to be stored in the order
+      const data: any = {
+        courseId: course._id,
+        userId: user?._id,
+        payment_info,
+      };
 
-        const html = await ejs.renderFile(path.join(__dirname,'../mails/'))
+      // Prepare the email content with order details
+      const mailData = {
+        order: {
+          _id: course.id.toString().slice(0, 6),  // Generate a short order ID
+          name: course.name,
+          price: course.price,
+          data: new Date().toLocaleDateString("en-US", {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+          }),
+        },
+      };
 
-    } catch (error:any) {
-        return next(new ErrorHandler(error.message,500));
+      // Render the HTML content of the order confirmation email using ejs template
+      const html = await ejs.renderFile(
+        path.join(__dirname, "../mails/order-confirmation.ejs"),
+        { order: mailData }
+      );
+
+      // Try sending the order confirmation email to the user
+      try {
+        if (user) {
+          // Send email with order details
+          await sendMail({
+            email: user.email,
+            subject: "Order Confirmation",  // Corrected typo: "Conformation" -> "Confirmation"
+            template: "order-confirmation.ejs",  // Email template name
+            data: mailData,  // Email data to be included in the template
+          });
+        }
+      } catch (error: any) {
+        // If email fails to send, return an internal server error
+        return next(new ErrorHandler(error.message, 500));
+      }
+
+      // Add the purchased course to the user's list of enrolled courses
+      user?.courses.push(course.id);
+      await user?.save();
+
+      // Create a notification for the user about the new order
+      await NotificationModel.create({
+        user: user?._id,
+        title: "New Order",
+        message: `You have a new order from ${course?.name}`,
+      });
+
+      // Increment the purchased count for the course
+      if (course.purchased) {
+        course.purchased += 1;
+      } else {
+        course.purchased = 1;  // Initialize purchase count if not set
+      }
+
+      // Save the updated course with the incremented purchase count
+      await course.save();
+
+      // Call the newOrder function to store the order in the database and respond
+      newOrder(data, res, next);
+
+    } catch (error: any) {
+      // Catch any errors during the process and pass them to the next middleware
+      return next(new ErrorHandler(error.message, 500));
     }
-})
+  }
+);
