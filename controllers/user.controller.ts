@@ -9,7 +9,7 @@ import path from "path"; // Utility for working with file paths
 import sendMail from "../utils/sendMail"; // Utility for sending emails
 import { accessTokenOption, refreshTokenOptions, sendToken } from "../utils/jwt";
 import { redis } from "../utils/redis";
-import { getAllUserService, getUserById } from "../services/user.service";
+import { getAllUserService, getUserById, updateUserRoleServices } from "../services/user.service";
 import cloudinary from "cloudinary";
 
 
@@ -520,3 +520,18 @@ export const getAllUsers = CatchAsyncError(async (req: Request, res: Response, n
     }
 });
 
+
+// Update user role - Only accessible by admin
+export const updateUserRole = CatchAsyncError(async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        // Extract user ID and new role from the request body
+        const { id, role } = req.body;
+
+        // Call the service function to update the user role
+        updateUserRoleServices(res, id, role);
+
+    } catch (error: any) {
+        // Pass the error to the centralized error handler
+        return next(new ErrorHandler(error.message, 400));
+    }
+});
