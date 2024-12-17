@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import { CatchAsyncError } from "../middleware/catchAsyncErrors";
 import ErrorHandler from "../utils/ErrorHandler";
 import cloudinary from "cloudinary";
-import { createCourse } from "../services/course.service";
+import { createCourse, getAllCourseService } from "../services/course.service";
 import CourseModel from "../models/course.model";
 import mongoose from "mongoose";
 import { redis } from "../utils/redis";
@@ -505,5 +505,17 @@ export const addReplayToReview = CatchAsyncError(async (req: Request, res: Respo
     } catch (error: any) {
         // Catch and forward any errors to the global error handler
         return next(new ErrorHandler(error.message, 500));
+    }
+});
+
+
+// Controller to get all courses - restricted to admin access only
+export const getAllCourses = CatchAsyncError(async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        // Calling the service function to fetch all courses and send the response
+        getAllCourseService(res);
+    } catch (error: any) {
+        // In case of any error, pass it to the error handler with a 400 status code
+        return next(new ErrorHandler(error.message, 400)); 
     }
 });

@@ -25,7 +25,7 @@ export const getAllCourseService = async (res: Response) => {
             success: true, // Indicates that the request was successful
             courses,       // The list of courses retrieved from the database
         });
-    } catch (error) {
+    } catch (error:any) {
         // Handle any errors that might occur while fetching courses
         res.status(500).json({
             success: false,  // Indicates an error occurred
