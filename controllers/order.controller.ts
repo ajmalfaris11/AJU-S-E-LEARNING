@@ -8,7 +8,7 @@ import path from "path";
 import ejs from "ejs";
 import sendMail from "../utils/sendMail";
 import NotificationModel from "../models/notification.model";
-import { newOrder } from "../services/order.service";
+import { getAllOrderServices, newOrder } from "../services/order.service";
 
 // Controller to create an order for a course
 export const createOrder = CatchAsyncError(
@@ -116,3 +116,14 @@ export const createOrder = CatchAsyncError(
     }
   }
 );
+
+// Controller to get all orders - restricted to admin access only
+export const getAllOrders = CatchAsyncError(async (req: Request, res: Response, next: NextFunction) => {
+  try {
+      // Calling the service function to fetch all orders and send the response
+      getAllOrderServices(res);
+  } catch (error: any) {
+      // In case of any error, pass it to the error handler with a 400 status code
+      return next(new ErrorHandler(error.message, 400)); 
+  }
+});
