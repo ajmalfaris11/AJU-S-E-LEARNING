@@ -9,6 +9,7 @@ import { redis } from "../utils/redis";
 import path from "path";
 import ejs from "ejs";
 import sendMail from "../utils/sendMail";
+import NotificationModel from "../models/notification.model";
 
 
 // Function to handle course uploads
@@ -258,6 +259,13 @@ export const addQueston = CatchAsyncError(async (req: Request, res: Response, ne
         // Add the new question to the `questions` array of the specific course content
         courseContent?.questions.push(newQuestion);
 
+        // create notification
+        await NotificationModel.create({
+            user: req.user?._id,
+            title: "New Question Received",
+            message: `You have a new question from ${courseContent?.title}`,
+          });
+
         // Save the updated course back to the database
         await course?.save();
 
@@ -324,6 +332,11 @@ export const answerQuestion = CatchAsyncError(async (req: Request, res: Response
 
         if (req.user?._id === question.user._id) {
             // create notification
+            await NotificationModel.create({
+                user: req.user?._id,
+                title: "New Question Replay Received",
+                message: `You have a new order from ${courseContent?.title}`,
+              });
         }
 
         // If the user replying is not the author of the question, send a notification to email
