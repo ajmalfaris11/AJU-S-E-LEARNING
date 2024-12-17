@@ -535,3 +535,35 @@ export const updateUserRole = CatchAsyncError(async (req: Request, res: Response
         return next(new ErrorHandler(error.message, 400));
     }
 });
+
+
+// Delete User - Only accessible by admin
+export const deleteUser = CatchAsyncError(async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        // Extract user ID from route parameters
+        const { id } = req.params;
+
+        // Check if the user exists in the database
+        const user = await userModel.findById(id);
+        if (!user) {
+            // If user not found, trigger a 404 error
+            return next(new ErrorHandler("User not found", 404));
+        }
+
+        // Delete the user from the database
+        await userModel.deleteOne({ id });
+
+        // Remove the user's data from Redis cache
+        await redis.del(id);
+
+        // Send a success response after deletion
+        res.status(200).json({
+            success: true,                // Indicates successful operation
+            message: "User deleted successfully"  // Success message
+        });
+
+    } catch (error: any) {
+        // Pass the error to the centralized error handler
+        return next(new ErrorHandler(error.message, 500));
+    }
+});
