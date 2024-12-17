@@ -519,3 +519,36 @@ export const getAllCourses = CatchAsyncError(async (req: Request, res: Response,
         return next(new ErrorHandler(error.message, 400)); 
     }
 });
+
+
+// Delete Course - Only accessible by admin
+export const deleteCourse = CatchAsyncError(async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        // Extract course ID from route parameters
+        const { id } = req.params;
+
+        // Check if the course exists in the database
+        const course = await CourseModel.findById(id);
+        if (!course) {
+            // If course not found, trigger a 404 error
+            return next(new ErrorHandler("Course not found", 404));
+        }
+
+        // Delete the course from the database
+        await CourseModel.deleteOne({ _id: id });
+
+        // Remove the course's data from Redis cache
+        await redis.del(id);
+
+        // Send a success response after deletion
+        res.status(200).json({
+            success: true,                // Indicates successful operation
+            message: "Course deleted successfully"  // Success message
+        });
+
+    } catch (error: any) {
+        // Pass the error to the centralized error handler
+        return next(new ErrorHandler(error.message, 500));
+    }
+});
+

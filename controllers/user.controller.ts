@@ -551,7 +551,7 @@ export const deleteUser = CatchAsyncError(async (req: Request, res: Response, ne
         }
 
         // Delete the user from the database
-        await userModel.deleteOne({ id });
+        await userModel.deleteOne({ _id: id });
 
         // Remove the user's data from Redis cache
         await redis.del(id);
