@@ -34,7 +34,7 @@ export const getAllUserService = async (res: Response) => {
             success: true, // Indicates the request was successful
             users,         // The list of users fetched from the database
         });
-    } catch (error) {
+    } catch (error:any) {
         // Handle any errors that might occur while fetching users
         res.status(500).json({
             success: false, // Indicates an error occurred

@@ -9,7 +9,7 @@ import path from "path"; // Utility for working with file paths
 import sendMail from "../utils/sendMail"; // Utility for sending emails
 import { accessTokenOption, refreshTokenOptions, sendToken } from "../utils/jwt";
 import { redis } from "../utils/redis";
-import { getUserById } from "../services/user.service";
+import { getAllUserService, getUserById } from "../services/user.service";
 import cloudinary from "cloudinary";
 
 
@@ -508,3 +508,15 @@ export const updateProfilePicture = CatchAsyncError(async (req: Request, res: Re
         return next(new ErrorHandler(error.message, 400)); 
     }
 });
+
+// Controller to get all users - restricted to admin access only
+export const getAllUsers = CatchAsyncError(async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        // Calling the service function to fetch all users from the database and send the response
+        getAllUserService(res);
+    } catch (error: any) {
+        // In case of any error, pass it to the error handler with a 400 status code
+        return next(new ErrorHandler(error.message, 400));
+    }
+});
+
