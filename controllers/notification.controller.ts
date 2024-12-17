@@ -2,6 +2,7 @@ import { CatchAsyncError } from "../middleware/catchAsyncErrors";
 import { NextFunction, Request, Response } from "express";
 import NotificationModel from "../models/notification.model";
 import ErrorHandler from "../utils/ErrorHandler";
+import cron from "node-cron";
 
 // Controller to fetch all notifications (only for admin)
 export const getNotifications = CatchAsyncError(async (req: Request, res: Response, next: NextFunction) => {
@@ -54,4 +55,24 @@ export const updateNotication = CatchAsyncError(async (req: Request, res: Respon
         // If any error occurs, pass the error to the next middleware with a 500 status code
         return next(new ErrorHandler(error.message, 500));
     }
+});
+
+// Schedule a cron job to run every day at midnight (00:00:00)
+cron.schedule("0 0 0 * * *", async () => {
+    // Calculate the date 30 days ago from the current date
+    const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 1000);
+
+    // Log the scheduled cleanup task (optional)
+    console.log("Running scheduled task: Deleting notifications older than 30 days.");
+
+    // Delete all "read" notifications that were created more than 30 days ago
+    await NotificationModel.deleteMany({
+        status: "read",               // Filter for notifications marked as "read"
+        createdAt: {                  // Filter by creation date
+            $lt: thirtyDaysAgo        // Notifications older than 30 days
+        }
+    });
+
+    // Optionally, log success or results (for debugging)
+    console.log("Old notifications cleaned up.");
 });
