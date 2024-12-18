@@ -80,3 +80,82 @@ export const createLayout = CatchAsyncError(async (req: Request, res: Response, 
         return next(new ErrorHandler(error.message, 500));
     }
 });
+
+// Update Layout
+export const editLayout = CatchAsyncError(async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { type } = req.body;
+
+        // Handle Banner type layout update
+        if (type === "Banner") {
+            const bannerData:any = await LayoutModel.findOne({type:"Banner"});
+            const { image, title, subTitle } = req.body;
+
+            // Delete old banner image if it exists
+            if(bannerData){
+                await cloudinary.v2.uploader.destroy(bannerData?.image.public_id);
+            };
+
+            // Upload new banner image to Cloudinary
+            const myCloud = await cloudinary.v2.uploader.upload(image, {
+                folder: "Layout",  
+            });
+
+            // Define new banner data
+            const banner = {
+                image: {
+                    public_id: myCloud.public_id,
+                    url: myCloud.secure_url,  
+                },
+                title,  
+                subTitle,  
+            };
+
+            // Update the banner data in the database
+            await LayoutModel.findByIdAndUpdate(bannerData._id, {banner});
+        }
+
+        // Handle FAQ type layout update
+        if (type === "FAQ") {
+            const faqData:any = await LayoutModel.findOne({type:"FAQ"});
+            const { faq } = req.body;
+
+            // Prepare updated FAQ entries
+            const faqItems = await Promise.all(
+                faq.map(async(item:any) => ({
+                    question: item.question,
+                    answer: item.answer,
+                }))
+            );
+
+            // Update FAQ entries in the database
+            await LayoutModel.findByIdAndUpdate(faqData?._id, {type:"FAQ", faq:faqItems});
+        }
+
+        // Handle Categories type layout update
+        if (type === "Catagories") {
+            const { catagories } = req.body;
+            const catagoryData = await LayoutModel.findOne({type:"Catagories"});
+
+            // Prepare updated category entries
+            const catagoryItems = await Promise.all(
+                catagories.map(async(item:any) => ({
+                    title: item.title,
+                }))
+            );
+
+            // Update categories in the database
+            await LayoutModel.findByIdAndUpdate(catagoryData?._id, {type:"Catagories", catagories:catagoryItems});
+        }
+
+        // Return success response
+        res.status(200).json({
+            success: true,
+            message: "Layout Updated successfully",  
+        });
+
+    } catch (error: any) {
+        // Handle and return error response
+        return next(new ErrorHandler(error.message, 500));
+    }
+});
