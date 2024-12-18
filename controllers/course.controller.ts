@@ -132,8 +132,8 @@ export const getSingleCourse = CatchAsyncError(
 
                 console.log("Hitting MongoDB");
 
-                // Cache the fetched course data in Redis
-                await redis.set(courseId, JSON.stringify(course));
+                // Cache the fetched course data in Redis with a 7-day expiration (604800 seconds)
+                await redis.set(courseId, JSON.stringify(course), 'EX', 604800); 
 
                 // Send the course data as a successful response
                 res.status(200).json({
