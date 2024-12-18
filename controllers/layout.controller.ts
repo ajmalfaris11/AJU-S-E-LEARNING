@@ -9,6 +9,12 @@ export const createLayout = CatchAsyncError(async (req: Request, res: Response, 
     try {
         const { type } = req.body;
 
+        const isTypeExist = await LayoutModel.findOne({type});
+
+        if(isTypeExist){
+            return next(new ErrorHandler(`${type} already exist`, 400))
+        }
+
         // Handle Banner type layout creation
         if (type === "Banner") {
             const { image, title, subTitle } = req.body;
@@ -35,15 +41,32 @@ export const createLayout = CatchAsyncError(async (req: Request, res: Response, 
         // Handle FAQ type layout creation
         if (type === "FAQ") {
             const { faq } = req.body;
+            const faqItems = await Promise.all(
+                faq.map(async(item:any) => {
+                    return {
+                        question: item.question,
+                        answer: item.answer,
+                    }
+                })
+            )
             // Create a new layout entry with FAQ data
-            await LayoutModel.create(faq);
+            await LayoutModel.create({type:"FAQ", faq:faqItems});
         }
 
         // Handle Categories type layout creation
         if (type === "Catagories") {
             const { catagories } = req.body;
+
+            const catagoryItems = await Promise.all(
+                catagories.map(async(item:any) => {
+                    return {
+                       title: item.title,
+                    }
+                })
+            )
+
             // Create a new layout entry with categories data
-            await LayoutModel.create(catagories);
+            await LayoutModel.create({type:"Catagories", catagories:catagoryItems});
         }
 
         // Return success response
