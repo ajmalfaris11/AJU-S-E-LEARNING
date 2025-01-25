@@ -354,23 +354,13 @@ interface IUpdateUserInfo {
 export const updateUserInfo = CatchAsyncError(async (req: Request, res: Response, next: NextFunction) => {
     try {
         // Destructure the name and email from the request body
-        const { name, email } = req.body as IUpdateUserInfo;
+        const { name } = req.body as IUpdateUserInfo;
 
         // Get the user ID from the authenticated user
         const userId: any = req.user?._id;
 
         // Find the user by their ID
         const user = await userModel.findById(userId);
-
-        // Check if the new email already exists in the database
-        if (email && user) {
-            const isEmailExist = await userModel.findOne({ email });
-            if (isEmailExist) {
-                // Return an error if the email already exists
-                return next(new ErrorHandler("Email already exists", 400));
-            }
-            user.email = email;
-        }
 
         // Update the user's name if provided
         if (name && user) {
